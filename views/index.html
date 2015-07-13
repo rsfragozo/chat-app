@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="chat">
+    <meta name="author" content="Rodrigo S Fragozo">
+    <title>Node.js Chat</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/css/style.css"/>
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+      <button type="button" class="navbar-toggle" id="menu-toggle">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">CHAT</a>
+  </div>
+  </nav>
+  <div class="container-fluid" id="nickname-container">
+    <div class="row">
+      <div class="col-sm-5 col-sm-offset-3 col-md-6 col-md-offset-2 main">
+        <h1>Choose a nickname!</h1>
+        <span id="nick-error"></span>
+        <form id="choose-nickname">
+            <input type="text" id="nickname"></input>
+        </form>
+      </div>
+    </div>
+  </div>
+    <div id="wrapper">
+      <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav" id="users"></ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+          <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+
+                            <div class="row">
+                              <h1 class="page-header">Lobby</h1>
+                              <div class="row-chat" id="chat"></div>
+                              <div class="row-chat">
+                                <form id="send-message">
+                                  <input type="text" id="new-message" autocomplete="off"></input>
+                                </form>
+                              </div>
+                            </div>
+                           <div class="row" id="pm-col">
+                              <h2 class="page-header" id="user-to-pm">Rodrigo</h2>
+                              <div class="row-chat" id="private-chat"></div>
+                              <div class="row-chat">
+                                <form id="send-pm">
+                                  <input type="text" id="new-pm" autocomplete="off"></input>
+                                </form>
+                              </div>
+                            </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/js/client-chat.js"></script>
+
+    <!-- Menu Toggle Script -->
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+
+    $("#wrapper").hide();
+    $("#wrapper").toggleClass("toggled");
+    </script>
+
+</body>
+
+</html>
