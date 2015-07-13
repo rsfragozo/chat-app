@@ -5,7 +5,7 @@ var http = require('http'),
 var app = express();
 app.use(express.static(__dirname + '/public'));
 
-var server = http.createServer(app).listen('3000', '127.0.0.1');
+var server = http.createServer(app).listen('80', '0.0.0.0');
 chatServer.listen(server);
 
 app.get('/', function(req, res){
