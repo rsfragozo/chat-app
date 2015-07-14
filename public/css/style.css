@@ -1,6 +1,15 @@
+/************************************************
+style.css
+Author: Rodrigo Soares Fragozo
+************************************************/
 body {
   padding-top: 50px;
 }
+
+h4 {
+  color: white;
+}
+
 #nickname {
     width: 20em;
 }

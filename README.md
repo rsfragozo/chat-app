@@ -1,10 +1,11 @@
 CHAT APP
 ====================
-THIS IS A CHAT APP.
+Node.js and Socket.io chat.
 
 Requirements
 ============
 * Node.js
+* Socket.io
 * MongoDB
 
 Usage

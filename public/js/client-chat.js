@@ -1,97 +1,102 @@
+/************************************************
+client-chat.js
+Author: Rodrigo Soares Fragozo
+************************************************/
+
 $(function(){
-	var socket = io.connect();
-	// id of user that is being private messaged
-	var userToPM = undefined;
-    var myNick = undefined;
+  var socket = io.connect();
+  var userToPM = undefined;
+  var nickname = undefined;
 
-	$('#choose-nickname').submit(function(e){
-		e.preventDefault();
-		var nick = $('#nickname').val();
-		socket.emit('choose-nickname', nick, function(err){
-			if (err) {
-				$('#nick-error').text(err);
-				$('#nickname').val('');
-			} else {
-				$('#nickname-container').hide();
-				$('#wrapper').show();
-				$("#wrapper").toggleClass("toggled");
-        myNick = nick;
-			}
-		});
-	});
+/************************************************
+ Socket events
+************************************************/
+  socket.on('usernames', function(usernames) {
+    displayUsers(usernames);
+  });
 
-	socket.on('names', function(users) {
-		displayUsers(users);
-	});
+  socket.on('notice', function(notice){
+    displayNotice(notice);
+  });
 
-	socket.on('new-user', function(user) {
-		displayUsers([user]);
-	});
-
-	function displayUsers(users){
-		var html = '', html_collapsed = '';
-		for (var i = 0; i < users.length; i++) {
-      if (users[i].nick != myNick)
-				html += '<li><a href="#" class="user" id="user' + users[i].id + '">' + users[i].nick + '<span id="user' + users[i].id + 'msgbox"></span></a></li>';
-				html_collapsed += '<li><a href="#" class="user" id="user' + users[i].id + '-collapsed">' + users[i].nick + '<span id="user' + users[i].id + 'msgbox"></span></a></li>';
-			}
-			$('#users').append(html);
-	    $('#users-collapsed').append(html_collapsed);
-			$('.user').click(function(e){
-    	if (!userToPM) {
-            $('#pm-col').show();
-    	}
-    	userToPM = $(this).attr('id').substring(4);
-			$('#user' + userToPM + 'msgbox').empty();
-    	$('#user-to-pm').html($(this).text());
-      $('#private-chat').empty();
-      socket.emit('load-old-private-messages', { from: myNick , to: $(this).text() });
-    });
-	}
-
-	socket.on('user-disconnect', function(id){
-		console.log(id);
-		$('#user'+id).remove();
-	});
-
-    $('#send-message').submit(function(e){
-        e.preventDefault();
-        var msg = $('#new-message').val();
-        socket.emit('message', msg);
-        $('#new-message').val('');
-    });
-
-    socket.on('message', function(data){
-    	displayMsg(data.msg, data.from, data.to)
-    });
-
-    socket.on('load-old-messages', function(docs){
-    	for (var i = docs.length-1; i >= 0; i--) {
-    		displayMsg(docs[i].msg, docs[i].from, docs[i].to);
-    	}
-    });
-
-    function displayMsg(msg, from, to){
-    	var html = "<span class='msg'><strong>" + from + " to " + to + ":</strong> " + msg +"</span>";
-        if (to == "everybody") {
-          $('#chat').append(html);
-        } else {
-          $('#private-chat').append(html);
-        }
+  socket.on('message', function(data){
+    if (data.to != "everybody" || data.to != undefined) {
+      if (nickname == data.to && userToPM != data.from) {
+        $('#' + data.from + 'messagebox').append('<b>*</b>');
+        return;
+      }
     }
+    displayMessage(data.message, data.from, data.to)
+  });
 
-    $('#send-pm').submit(function(e){
-    	e.preventDefault();
-    	socket.emit('private-message', {msg: $('#new-pm').val(), userToPM: userToPM});
-    	$('#new-pm').val('');
+  socket.on('messages', function(messages){
+    for (var key = messages.length-1; key >= 0; key--) {
+      displayMessage(messages[key].message, messages[key].from, messages[key].to);
+    }
+  });
+
+/************************************************
+ JQuery scritps
+************************************************/
+
+  $('#choose-nickname').submit(function(e){
+    e.preventDefault();
+    nickname = $('#nickname').val();
+    socket.emit('login', { nickname: nickname }, function(err){
+      if (err) {
+        $('#nick-error').text(err);
+        $('#nickname').val('');
+      } else {
+        $('#nickname-container').hide();
+        $('#wrapper').show();
+        $("#wrapper").toggleClass("toggled");
+      }
     });
+  });
 
-    socket.on('private-message', function(data){
-			if (myNick == data.from || userToPM == data.id) {
-				displayMsg(data.msg, data.from, data.to);
-			} else {
-				$('#user' + data.id + 'msgbox').append('<b>*</b>');
-			}
+  $('#send-message').submit(function(e){
+    e.preventDefault();
+    var message = $('#new-message').val();
+    socket.emit('message', { from: nickname, to: "everybody", message: message } );
+    $('#new-message').val('');
+  });
+
+  $('#send-pm').submit(function(e){
+    e.preventDefault();
+    socket.emit('message', { from: nickname, to: userToPM, message: $('#new-pm').val() } );
+    $('#new-pm').val('');
+  });
+
+/************************************************
+ Aditional functions
+************************************************/
+  function displayUsers(usernames){
+    var html = '<li><h4>Hello, ' + nickname + '!</h4><li>';
+    for (var i = 0; i < usernames.length; i++) {
+      if (usernames[i] != nickname) html += '<li><a href="#" class="user" id="' + usernames[i] + '">' + usernames[i] + '<span id="' + usernames[i] + 'messagebox"></span></a></li>';
+    }
+    $('#users').html(html);
+    $('.user').click(function(e){
+      if (!userToPM) $('#pm-col').show();
+      userToPM = $(this).attr('id');
+      $('#' + userToPM + 'messagebox').empty();
+      $('#user-to-pm').html($(this).text());
+      $('#private-chat').empty();
+      socket.emit('load-old-private-messages', { from: nickname , to: $(this).attr('id') });
     });
+  }
 
+  function displayMessage(message, from, to){
+    var html = "<p class='message'><strong>" + from + " to " + to + ":</strong> " + message +"</p>";
+    if (to == "everybody" || to == undefined) {
+      $('#chat').append(html);
+    } else {
+      $('#private-chat').append(html);
+    }
+  }
+
+  function displayNotice(notice){
+    var html = "<p class='message' style='color: darkgray;'><i><strong>" + notice +"</i></p>";
+    $('#chat').append(html);
+  }
 });
